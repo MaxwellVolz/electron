@@ -59,7 +59,7 @@ app.on('ready', async function () {
 
     process.stdout.write(`${one.length}${two.length}${three.length}`)
   } catch (e) {
-    process.stdout.write("ERROR")
+    process.stdout.write('ERROR')
   } finally {
     process.stdout.end()
     app.exit()
