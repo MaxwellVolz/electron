@@ -57,6 +57,7 @@ async function deleteDraft (tag, targetRepo) {
       repo: targetRepo,
       tag
     })
+    console.log(result)
     if (!result.draft) {
       console.log(`Published releases cannot be deleted.`)
       process.exit(1)
@@ -96,6 +97,7 @@ async function cleanReleaseArtifacts () {
     await deleteDraft(tag, 'nightlies')
     await deleteTag(tag, 'nightlies')
   } else {
+    console.log('we are here')
     await deleteDraft(tag, 'electron')
   }
 

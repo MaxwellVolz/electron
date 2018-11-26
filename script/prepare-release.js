@@ -93,7 +93,7 @@ async function createRelease (branchToTarget, isBeta) {
   console.log(`Checking for existing draft release.`)
   const releases = await github.repos.getReleases(githubOpts)
     .catch(err => {
-      console.log('$fail} Could not get releases.  Error was', err)
+      console.log('Could not get releases. Error was: ', err)
     })
   const drafts = releases.data.filter(release => release.draft &&
     release.tag_name === newVersion)
@@ -124,12 +124,13 @@ async function createRelease (branchToTarget, isBeta) {
   }
   githubOpts.tag_name = newVersion
   githubOpts.target_commitish = newVersion.indexOf('nightly') !== -1 ? 'master' : branchToTarget
-  await github.repos.createRelease(githubOpts)
+  const release = await github.repos.createRelease(githubOpts)
     .catch(err => {
       console.log(`${fail} Error creating new release: `, err)
       process.exit(1)
     })
   console.log(`${pass} Draft release for ${newVersion} has been created.`)
+  return release
 }
 
 async function pushRelease (branch) {
@@ -212,9 +213,11 @@ async function prepareRelease (isBeta, notesOnly) {
       const changes = await changesToRelease(currentBranch)
       if (changes) {
         await verifyNewVersion()
-        await createRelease(currentBranch, isBeta)
+        const draftRelease = await createRelease(currentBranch, isBeta)
         await pushRelease(currentBranch)
         await runReleaseBuilds(currentBranch)
+
+        return draftRelease
       } else {
         console.log(`There are no new changes to this branch since the last release, aborting release.`)
         process.exit(1)
@@ -223,4 +226,4 @@ async function prepareRelease (isBeta, notesOnly) {
   }
 }
 
-prepareRelease(!args.stable, args.notesOnly)
+module.exports = { prepareRelease }
